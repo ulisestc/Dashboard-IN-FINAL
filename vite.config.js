@@ -5,5 +5,11 @@ export default defineConfig({
   plugins: [react()],
   build: {
     cssCodeSplit: true
+  },
+  server: {
+    cors: {
+      origin: ['https://dashboard-in-final.onrender.com'],
+      credentials: true
+    }
   }
 })
