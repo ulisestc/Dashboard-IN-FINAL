@@ -7,9 +7,6 @@ export default defineConfig({
     cssCodeSplit: true
   },
   server: {
-    cors: {
-      origin: ['https://dashboard-in-final.onrender.com'],
-      credentials: true
-    }
+    allowedHosts: true
   }
 })
