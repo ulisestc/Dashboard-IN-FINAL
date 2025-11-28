@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { 
-  BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, 
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+import {
+  BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { Target, TrendingUp, Users, Lightbulb, Zap, ShieldCheck, AlertTriangle, Clock } from 'lucide-react';
 import { cuboAPI } from '../../services/api';
@@ -31,7 +31,17 @@ const BalancedScorecard = () => {
     </div>
   );
 
-  const { kpis, graficas } = data;
+  const { kpis, graficas } = data || {};
+
+  if (!kpis || !graficas) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 text-gray-500">
+        <AlertTriangle className="w-12 h-12 mb-4 text-yellow-500" />
+        <p className="text-lg font-semibold">No se pudieron cargar los datos del Scorecard</p>
+        <p className="text-sm">Por favor intente nuevamente más tarde.</p>
+      </div>
+    );
+  }
 
   // Radar Chart: Normalizamos todo a escala 0-100 para ver el "balance" de la estrategia
   const radarData = [
@@ -67,61 +77,61 @@ const BalancedScorecard = () => {
 
       {/* Tarjetas de Perspectivas (OKRs) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* 1. FINANCIERA */}
-        <PerspectivaCard 
-          titulo="Financiera: Sostenibilidad" 
+        <PerspectivaCard
+          titulo="Financiera: Sostenibilidad"
           objetivo="Impulsar la transformación digital con modelos rentables."
           icon={<TrendingUp className="w-6 h-6" />}
           color="bg-emerald-600"
         >
-          <MetricaOKR 
+          <MetricaOKR
             label="% Proyectos de Alto Valor (>20% margen)"
             valor={`${Number(kpis.fin_pct_alto_valor).toFixed(1)}%`}
             subtexto="Meta: > 40% del portafolio"
             progress={kpis.fin_pct_alto_valor}
           />
-          
+
           <div className="mt-6 pt-4 border-t border-gray-100">
             <p className="text-xs font-semibold text-gray-500 mb-2">Histórico de Rentabilidad (Promedio Anual)</p>
             <div className="h-48 w-full">
-               <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={graficas.rentabilidad}
-                    margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-                  >
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                     <XAxis 
-                        dataKey="Año" 
-                        tick={{fontSize: 11}} 
-                        axisLine={false}
-                        tickLine={false}
-                     />
-                     <YAxis 
-                        tick={{fontSize: 11}} 
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(val) => `$${val/1000}k`} // Formato corto: $15k
-                     />
-                     <Tooltip 
-                        formatter={(value) => [`$${Number(value).toLocaleString()}`, "Rentabilidad"]}
-                        contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
-                     />
-                     <Bar dataKey="rentabilidad_promedio" name="Rentabilidad" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-               </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={graficas.rentabilidad}
+                  margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="Año"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(val) => `$${val / 1000}k`} // Formato corto: $15k
+                  />
+                  <Tooltip
+                    formatter={(value) => [`$${Number(value).toLocaleString()}`, "Rentabilidad"]}
+                    contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                  />
+                  <Bar dataKey="rentabilidad_promedio" name="Rentabilidad" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </PerspectivaCard>
 
         {/* 2. CLIENTE */}
-        <PerspectivaCard 
-          titulo="Cliente: Referente de Mercado" 
+        <PerspectivaCard
+          titulo="Cliente: Referente de Mercado"
           objetivo="Consolidarse como referente en sectores estratégicos."
           icon={<Users className="w-6 h-6" />}
           color="bg-blue-600"
         >
-          <MetricaOKR 
+          <MetricaOKR
             label="Satisfacción en Sectores VIP (Alta Importancia)"
             valor={`${Number(kpis.cli_liderazgo_vip).toFixed(1)} / 100`}
             subtexto="Meta: > 95.0 (Excelencia)"
@@ -131,69 +141,69 @@ const BalancedScorecard = () => {
           <div className="mt-6 pt-4 border-t border-gray-100">
             <p className="text-xs font-semibold text-gray-500 mb-2">Satisfacción por Sector Industrial</p>
             <div className="h-48 w-full">
-               <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={graficas.satisfaccion}
-                    margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-                  >
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                     <XAxis 
-                        dataKey="Sector_Industrial" 
-                        tick={{fontSize: 10}} 
-                        interval={0} 
-                        angle={-15}  
-                        textAnchor="end"
-                        height={40}
-                        axisLine={false}
-                        tickLine={false}
-                     />
-                     <YAxis 
-                        domain={[0, 100]} 
-                        tick={{fontSize: 11}} 
-                        axisLine={false}
-                        tickLine={false}
-                     />
-                     <Tooltip 
-                        formatter={(value) => [`${Number(value).toFixed(1)}`, "Satisfacción"]}
-                        contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
-                     />
-                     <Bar dataKey="satisfaccion_promedio" name="Satisfacción" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-               </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={graficas.satisfaccion}
+                  margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="Sector_Industrial"
+                    tick={{ fontSize: 10 }}
+                    interval={0}
+                    angle={-15}
+                    textAnchor="end"
+                    height={40}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value) => [`${Number(value).toFixed(1)}`, "Satisfacción"]}
+                    contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                  />
+                  <Bar dataKey="satisfaccion_promedio" name="Satisfacción" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </PerspectivaCard>
 
         {/* 3. PROCESOS INTERNOS */}
-        <PerspectivaCard 
-          titulo="Procesos: Soluciones Confiables" 
+        <PerspectivaCard
+          titulo="Procesos: Soluciones Confiables"
           objetivo="Excelencia operativa y cero defectos críticos."
           icon={<ShieldCheck className="w-6 h-6" />}
           color="bg-orange-500"
         >
-          <MetricaOKR 
+          <MetricaOKR
             label="Tasa de 'Clean Code' (0 Bugs Críticos)"
             valor={`${Number(kpis.proc_pct_clean_code).toFixed(1)}%`}
             subtexto="Meta: > 80% de los proyectos"
             progress={kpis.proc_pct_clean_code}
           />
-          
+
         </PerspectivaCard>
 
         {/* 4. APRENDIZAJE */}
-        <PerspectivaCard 
-          titulo="Aprendizaje: Software Inteligente" 
+        <PerspectivaCard
+          titulo="Aprendizaje: Software Inteligente"
           objetivo="Productos escalables y gestión del conocimiento."
           icon={<Lightbulb className="w-6 h-6" />}
           color="bg-purple-600"
         >
-          <MetricaOKR 
+          <MetricaOKR
             label="Nivel de Modularización (Escalabilidad)"
             valor={`${Number(kpis.apr_innovacion_modular).toFixed(1)}%`}
             subtexto="Meta: > 75% (Arquitectura Inteligente)"
             progress={kpis.apr_innovacion_modular}
           />
-          
+
         </PerspectivaCard>
 
       </div>
@@ -230,15 +240,15 @@ const MetricaOKR = ({ label, valor, subtexto, progress }) => (
 );
 
 const MiniKpi = ({ label, valor, icon }) => (
-   <div className="bg-gray-50 p-3 rounded border border-gray-100 flex items-center gap-3">
-      <div className="bg-white p-2 rounded-full shadow-sm">
-         {icon}
-      </div>
-      <div>
-         <p className="text-xs text-gray-500">{label}</p>
-         <p className="text-sm font-bold text-gray-800">{valor}</p>
-      </div>
-   </div>
+  <div className="bg-gray-50 p-3 rounded border border-gray-100 flex items-center gap-3">
+    <div className="bg-white p-2 rounded-full shadow-sm">
+      {icon}
+    </div>
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm font-bold text-gray-800">{valor}</p>
+    </div>
+  </div>
 );
 
 export default BalancedScorecard;
